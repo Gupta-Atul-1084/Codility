@@ -1,0 +1,171 @@
+internal class Program
+{
+    private static void Main(string[] args)
+    {
+        int[] R = { 1, 3, 4 };
+        int F = 2;
+        int M = 5;
+
+        int[] forgottenRolls = FindForgottenRolls(R, F, M);
+        Console.WriteLine($"Forgotten Rolls: [{string.Join(", ", forgottenRolls)}]");
+
+
+        //int[] F = { 4, 2, 3 }; // Number of friends arriving
+        //int[] C = { 2, 4, 3 }; // S
+        //Console.WriteLine("Minimum car required for all friends " + MinCarsRequired(F, C));
+
+
+        //int[] D = { 2,5,9,2,1,4};//5, 8, 2, 7 };
+        //int X = 3;
+        //Console.WriteLine("Minimum number of days: " + MinDaysToCompleteMissions(D, X));
+
+
+        //int[] circleNumbers = { 1, 2,3,4,5,6,7,8,9,10};
+        //var output = Solution(circleNumbers);
+
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="rolls"></param>
+    /// <param name="n"></param>
+    /// <param name="mean"></param>
+    /// <returns></returns>
+    static int[] FindForgottenRolls(int[] rolls, int n, int mean)
+    {
+        int m = rolls.Length;
+        int totalSum = mean * (n + m);
+        int sum = totalSum - rolls.Sum();
+
+        if (sum < n || sum > 6 * n) return new int[0];
+
+        int[] res = new int[n];
+        int avg = sum / n;
+        int rem = sum % n;
+
+        for (int i = 0; i < n; i++)
+        {
+            res[i] = avg + (i < rem ? 1 : 0);
+        }
+
+        return res;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="f"></param>
+    /// <param name="c"></param>
+    /// <returns></returns>
+    private static int MinCarsRequired(int[] f, int[] c)
+    {
+        int tFrs = f.Sum();
+        Array.Sort(c);
+
+        int minCarReqired = 0;
+        for (int i = c.Length-1; i>=0; i--)
+        {
+           if( tFrs - c[i] >= 0)
+            {
+                tFrs = tFrs - c[i];
+                minCarReqired++;
+            }
+                
+        }
+        return minCarReqired;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="D"></param>
+    /// <param name="X"></param>
+    /// <returns></returns>
+    static int MinDaysToCompleteMissions(int[] D, int X)
+    {
+        int days = 0;
+        int i = 0;
+        int n = D.Length;
+
+        while (i < n)
+        {
+            int maxDifficulty = D[i];
+            int minDifficulty = D[i];
+
+            while (i < n && Math.Max(maxDifficulty, D[i]) - Math.Min(minDifficulty, D[i]) <= X)
+            {
+                maxDifficulty = Math.Max(maxDifficulty, D[i]);
+                minDifficulty = Math.Min(minDifficulty, D[i]);
+                i++;
+            }
+            days++;
+        }
+        return days;
+    }
+
+
+/// <summary>
+/// preferred
+/// </summary>
+/// <param name="a"></param>
+/// <returns></returns>
+public static int Solution(int[] a)
+    {
+        int i = 0;
+        int pairCount = 0;
+        int arrLen = a.Length;
+
+        bool[] used = new bool[arrLen];
+        while (i < arrLen)
+        {
+            int next = (i + 1) % arrLen;
+            if (!used[i] && !used[next] && (a[i] + a[next])%2 == 0 )
+            {
+                used[i] = used[next] = true;
+                pairCount++;
+                i = i + 2;
+            }
+            else
+            {
+                i++;
+            }
+        }
+        return pairCount == 0 ? -1 : pairCount;
+    }
+
+    /// <summary>
+    /// No cover all use cases
+    /// </summary>
+    /// <param name="a"></param>
+    /// <returns></returns>
+    public static int Solution1(int[] a)
+    {
+        int i = 1;
+        int pairCount = 0;
+        while (i < a.Length - 1)
+        {
+            int sum = a[i] + a[i - 1];
+            if (sum % 2 == 0)
+            {
+                pairCount++;
+                i = i + 2;
+                continue;
+            }
+            
+            if (i == a.Length - 1)
+                continue;
+
+            sum = a[i] + a[i + 1];
+            if(sum % 2 ==0)
+            {
+                pairCount++;
+                i= i + 3; 
+                continue;
+            }
+
+            i = i + 2;
+        }
+        return pairCount == 0 ? -1 : pairCount;
+    }
+}
