@@ -1,0 +1,114 @@
+namespace codility_test_practice
+{
+    internal class Program2
+    {
+        //1. Players Moving Without Collision
+
+        //  Problem Approach:
+        //- Players press arrow keys(<, >, ^, v) to move.
+        //- Determine how many players can successfully move without colliding.
+        public int CountSuccessfulMoves(string S)
+        {
+            int N = S.Length;
+            bool[] occupied = new bool[N]; // Track occupied positions
+            int successfulMoves = 0;
+
+            for (int i = 0; i < N; i++)
+            {
+                if (S[i] == '<' && i > 0 && !occupied[i - 1])
+                {
+                    occupied[i - 1] = true;
+                    successfulMoves++;
+                }
+                else if (S[i] == '>' && i < N - 1 && !occupied[i + 1])
+                {
+                    occupied[i + 1] = true;
+                    successfulMoves++;
+                }
+                else if ((S[i] == '^' || S[i] == 'v') && !occupied[i]) // Up/Down move (same position)
+                {
+                    occupied[i] = true;
+                    successfulMoves++;
+                }
+            }
+
+            return successfulMoves;
+        }
+
+
+        //2. Longest Switching Slice
+
+        //Problem Approach:
+        //- A switching slice means:
+        //- Even-indexed elements are equal.
+        //- Odd-indexed elements are equal.
+        //- Find the longest valid switching slice.
+        public int LongestSwitchingSlice(int[] A)
+        {
+            if (A.Length == 1) return 1; // Edge case: Single element
+
+            int maxLength = 1, currentLength = 1;
+
+            for (int i = 1; i < A.Length; i++)
+            {
+                if ((i % 2 == 0 && A[i] == A[i - 2]) || (i % 2 == 1 && A[i] == A[i - 2]))
+                {
+                    currentLength++;
+                }
+                else
+                {
+                    currentLength = 1; // Reset when switching property breaks
+                }
+                maxLength = Math.Max(maxLength, currentLength);
+            }
+
+            return maxLength;
+        }
+
+
+        //The problem requires transforming a given string (consisting of only 'A' and 'B') into the format "A...AB...B" by deleting the minimum number of characters.The goal is to ensure that all 'A's appear before all 'B's while minimizing deletions.
+        //Approach:
+        //- Count misplaced 'B's before 'A's (these need to be removed).
+        //- Count misplaced 'A's after 'B's(these need to be removed).
+        //- Return the minimum deletions required to achieve the correct format.
+        public static int MinDeletionsToSortAB(string S)
+        {
+            int countA = 0, countB = 0, minDeletions = S.Length;
+
+            // Count total 'A's
+            foreach (char c in S)
+            {
+                if (c == 'A') countA++;
+            }
+
+            // Traverse and track misplaced 'B's before 'A's
+            foreach (char c in S)
+            {
+                if (c == 'B') countB++; // Count misplaced 'B's
+                else countA--; // Reduce remaining 'A's
+                minDeletions = Math.Min(minDeletions, countB + countA);
+            }
+
+            return minDeletions;
+        }
+
+        public static void Main()
+        {
+            Program2 sol = new Program2();
+            Console.WriteLine(sol.CountSuccessfulMoves(">^<v")); // Output: 2
+            Console.WriteLine(sol.CountSuccessfulMoves("<^<^v>")); // Output: 6
+            Console.WriteLine(sol.CountSuccessfulMoves("<>>^")); // Output: 0
+
+
+            Console.WriteLine(sol.LongestSwitchingSlice(new int[] { 5 })); // Output: 1
+            Console.WriteLine(sol.LongestSwitchingSlice(new int[] { 7, -5, -5, -5, 7, -1, 7 })); // Output: 3
+            Console.WriteLine(sol.LongestSwitchingSlice(new int[] { 3, 2, 3, 2, 3 })); // Output: 5
+
+
+            Console.WriteLine(MinDeletionsToSortAB("BAAABAB")); // Output: 2
+            Console.WriteLine(MinDeletionsToSortAB("ABAB")); // Output: 1
+            Console.WriteLine(MinDeletionsToSortAB("BBBB")); // Output: 0
+            Console.WriteLine(MinDeletionsToSortAB("AAA")); // Output: 0
+        }
+    }
+}
