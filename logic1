@@ -1,0 +1,66 @@
+using System;
+using System.Collections.Concurrent;
+using System.Linq;
+using System.Text.RegularExpressions;
+
+public static class UniqueIdGenerator
+{
+    // Thread-safe store to track duplicate bases
+    private static readonly ConcurrentDictionary<string,int> Counters = 
+        new ConcurrentDictionary<string,int>();
+
+    /// <summary>
+    /// Generates a ≤32-char alphanumeric ID by taking the first 3 chars of each word,
+    /// truncating/padding as needed, and appending a counter on collisions.
+    /// </summary>
+    public static string Generate(string sentence)
+    {
+        if (string.IsNullOrWhiteSpace(sentence))
+            throw new ArgumentException("Input cannot be empty", nameof(sentence));
+
+        // 1. Extract and sanitize each word’s first 3 chars
+        var parts = sentence
+            .Split(new[]{' '}, StringSplitOptions.RemoveEmptyEntries)
+            .Select(w =>
+            {
+                // strip non-alphanumeric, then take up to 3 chars
+                var clean = Regex.Replace(w, "[^A-Za-z0-9]", "");
+                return clean.Length <= 3 
+                    ? clean 
+                    : clean.Substring(0, 3);
+            });
+
+        // 2. Build base ID and uppercase
+        var baseId = string.Concat(parts).ToUpperInvariant();
+
+        // 3. Truncate to 32 chars if needed
+        if (baseId.Length > 32)
+            baseId = baseId.Substring(0, 32);
+
+        // 4. Ensure uniqueness by appending a counter suffix on collision
+        var count = Counters.AddOrUpdate(baseId, 1, (_, c) => c + 1);
+        if (count > 1)
+        {
+            var suffix = count.ToString();
+            var maxBaseLen = 32 - suffix.Length;
+            if (maxBaseLen < 1)
+                throw new InvalidOperationException("Base ID too short to append suffix.");
+
+            baseId = baseId.Length > maxBaseLen
+                ? baseId.Substring(0, maxBaseLen) + suffix
+                : baseId + suffix;
+        }
+
+        return baseId;
+    }
+}
+
+// Example usage:
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine(UniqueIdGenerator.Generate("Hello world from CSharp"));
+        Console.WriteLine(UniqueIdGenerator.Generate("Hello world from CSharp")); // collision → suffix
+    }
+}
